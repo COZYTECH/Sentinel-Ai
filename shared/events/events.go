@@ -22,3 +22,10 @@ type EmployeeActivityEvent struct {
 	IPAddress  string    `json:"ip_address"`
 	Timestamp  time.Time `json:"timestamp"`
 }
+
+type EmployeeAccessEvent struct {
+	EmployeeID string `json:"employee_id"`
+	UserID     string `json:"user_id"`
+	Action     string `json:"action"`
+	Timestamp  string `json:"timestamp"`
+}
