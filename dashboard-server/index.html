@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+  <head>
+    <title>Fraud Dashboard</title>
+    <style>
+      body {
+        font-family: Arial;
+        background: #f4f4f4;
+      }
+      .card {
+        background: white;
+        padding: 1em;
+        margin: 1em;
+        border-radius: 8px;
+        box-shadow: 0 0 5px #ccc;
+      }
+      .high {
+        border-left: 5px solid red;
+      }
+      .medium {
+        border-left: 5px solid orange;
+      }
+      .low {
+        border-left: 5px solid green;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Live Fraud Dashboard</h1>
+    <div id="dashboard"></div>
+
+    <script>
+      const ws = new WebSocket("ws://localhost:8085/ws");
+      const dashboard = document.getElementById("dashboard");
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        const div = document.createElement("div");
+        div.className = "card " + data.risk_level.toLowerCase();
+        div.innerHTML = `
+        <strong>Risk Score:</strong> ${data.risk_score} <br/>
+        <strong>Risk Level:</strong> ${data.risk_level} <br/>
+        <strong>Primary Factors:</strong> ${data.primary_risk_factors.join(", ")} <br/>
+        <strong>Action:</strong> ${data.recommended_action} <br/>
+        <strong>Behavior:</strong> ${data.behavioral_analysis}
+      `;
+        dashboard.prepend(div);
+      };
+    </script>
+  </body>
+</html>
