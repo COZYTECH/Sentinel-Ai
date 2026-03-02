@@ -7,6 +7,7 @@ import (
 func main() {
 
 	InitDB()
+	InitRedis()
 	r := gin.Default()
 
 	r.POST("/transactions", CreateTransaction)

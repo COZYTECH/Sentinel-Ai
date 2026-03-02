@@ -1,11 +1,16 @@
 package main
 
 import (
+	"log"
 	"net/http"
 	"time"
 
+	"encoding/json"
+
+	"github.com/COZYTECH/Sentinel-Ai/shared/events"
 	"github.com/gin-gonic/gin"
 	"github.com/google/uuid"
+	"github.com/redis/go-redis/v9"
 )
 
 type CreateTransactionRequest struct {
@@ -48,6 +53,33 @@ func CreateTransaction(c *gin.Context) {
 		req.IPAddress,
 		"PENDING",
 	)
+
+
+
+		event := events.TransactionCreatedEvent{
+		Event:         "transaction.created",
+		TransactionID: transactionID,
+		UserID:        req.UserID,
+		Amount:        req.Amount,
+		Currency:      req.Currency,
+		Country:       req.Country,
+		DeviceID:      req.DeviceID,
+		IPAddress:     req.IPAddress,
+		Timestamp:     time.Now(),
+	}
+
+	eventData, _ := json.Marshal(event)
+
+	err = RDB.XAdd(Ctx, &redis.XAddArgs{
+		Stream: "fraud-events-stream",
+		Values: map[string]interface{}{
+			"data": eventData,
+		},
+	}).Err()
+
+	if err != nil {
+		log.Println("Failed to publish event:", err)
+	}
 
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
