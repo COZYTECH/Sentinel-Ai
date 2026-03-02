@@ -31,6 +31,29 @@ func CreateTransaction(c *gin.Context) {
 	// 1. Save to MySQL
 	// 2. Publish event to Redis
 
+
+	query := `
+	INSERT INTO transactions 
+	(id, user_id, amount, currency, country, device_id, ip_address, status)
+	VALUES (?, ?, ?, ?, ?, ?, ?, ?)`
+
+	_, err := DB.Exec(
+		query,
+		transactionID,
+		req.UserID,
+		req.Amount,
+		req.Currency,
+		req.Country,
+		req.DeviceID,
+		req.IPAddress,
+		"PENDING",
+	)
+
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
 	c.JSON(http.StatusCreated, gin.H{
 		"transaction_id": transactionID,
 		"timestamp":      time.Now(),
